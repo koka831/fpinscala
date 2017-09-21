@@ -38,11 +38,20 @@ object List {
       case Cons(x, xs) => f(x, foldRight(xs, z)(f))
     }
 
+  @annotation.tailrec
+  def foldLeft[A, B](as: List[A], z: B)(f: (B,A) => B): B =
+    as match {
+      case Nil => z
+      case Cons(h,t) => foldLeft(t, f(z, h))(f)
+    }
+
   def sum2(ns: List[Int]) = foldRight(ns, 0)((x,y) => x + y)
   // (x, y) => x * y == _ * _
   // _表記:e.g _.head, _ drop _ => xs.head, (xs, n) => xs.drop(n)
   // むやみに使用しない
   def product2(ds: List[Double]) = foldRight(ds, 1.0)(_ * _) 
+
+  def length[A](as: List[A]): Int = foldRight(as, 0)((_,acc) => acc + 1)
 
   // A*: 可変長
   def apply[A](as: A*): List[A] = {
@@ -104,6 +113,24 @@ object List {
       case (h, t) => init(h, init(t))
     }
 
+  def addOne(l: List[Int]): List[Int] =
+    foldRight(l, Nil:List[Int])((h,t) => Cons(h+1,t))
+
+  def double2String(l: List[Double]): List[String] =
+    foldRight(l, Nil:List[String])((h,t) => Cons(h.toString,t))
+
+  def map[A,B](as: List[A])(f: A => B): List[B] =
+    foldRight(as, Nil:List[B])((h,t) => Cons(f(h),t))
+
+  // TODO
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, Nil:List[A])((h,t) => if (f(h)) Cons(h,t) else t)
+
+  def flatMap[A,B](l: List[A])(f: A => List[B]): List[B] =
+    concat(map(l)(f))
+
+  def filter_1[A](l: List[A])(f: A => Boolean): List[A] =
+    flatMap(l)(a => if (f(a)) List(a) else Nil)
 }
 
 object Main {
